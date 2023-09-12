@@ -67,7 +67,7 @@ function Map() {
   };
 
   return (
-    <LoadScript googleMapsApiKey="AIzaSyBtVObQAajpl8gMExZz4dkFiubj8oxVy5E">
+    <LoadScript googleMapsApiKey="HEHEH">
       <div style={{ position: 'relative' }}>
         <GoogleMap
           mapContainerStyle={containerStyle}
