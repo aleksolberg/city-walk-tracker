@@ -10,11 +10,12 @@ const containerStyle = {
   height: '100vh'
 };
 
+let watchId = null;
+
 function Map() {
   const [center, setCenter] = useState(null);  // start with no center until fetched
   const [isTracking, setIsTracking] = useState(false);
   const [pathData, setPathData] = useState([]);
-  let watchId = null;
 
   useEffect(() => {
     // Fetch initial geolocation
@@ -67,7 +68,7 @@ function Map() {
   };
 
   return (
-    <LoadScript googleMapsApiKey="HEHEH">
+    <LoadScript googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
       <div style={{ position: 'relative' }}>
         <GoogleMap
           mapContainerStyle={containerStyle}
