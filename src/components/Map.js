@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { GoogleMap, LoadScript } from '@react-google-maps/api';
 import TrackingControl from './TrackingControl';
 import RawPath from './RawPath';
+import SnappedPath from './SnappedPath';
 import { addRawPath, getAllRawPaths, deleteRawPath, clearRawPaths } from './IndexedDB';
 import { DownloadCSV } from './DownloadCSV';
 import { ClearDatabase } from './ClearDatabase';
+import { snapToRoads } from './RoadsUtils';
 
 const containerStyle = {
     width: '100vw',
@@ -16,8 +18,9 @@ let watchId = null;
 function Map() {
     const [center, setCenter] = useState(null);
     const [isTracking, setIsTracking] = useState(false);
-    const [currentPathData, setCurrentPathData] = useState([]);
+    const [currentRawPath, setCurrentRawPath] = useState([]);
     const [previousRawPaths, setPreviousRawPaths] = useState([]);
+    const [currentSnappedPath, setCurrentSnappedPath] = useState([]);
 
     useEffect(() => {
         // Fetch initial geolocation
@@ -56,11 +59,21 @@ function Map() {
     const startTracking = () => {
         if ("geolocation" in navigator) {
             watchId = navigator.geolocation.watchPosition(
-                function (position) {
-                    setCurrentPathData(prevPath => [...prevPath, {
+                async function (position) {
+                    setCurrentRawPath(prevPath => [...prevPath, {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude
                     }]);
+                    try {
+                        const [snappedPoint, placeId] = await snapToRoads(position.coords.latitude, position.coords.longitude)
+                        setCurrentSnappedPath(prevPath => [...prevPath, {
+                            lat: snappedPoint.latitude,
+                            lng: snappedPoint.longitude
+                        }])
+                        console.log(placeId)
+                    } catch (error) {
+                        console.error("Error snapping to road:", error);
+                    }
                 },
                 function (error) {
                     console.error("Error while tracking: ", error);
@@ -82,7 +95,7 @@ function Map() {
             navigator.geolocation.clearWatch(watchId);
             setIsTracking(false);
             try {
-                await addRawPath(currentPathData);
+                await addRawPath(currentRawPath);
                 console.log('Path saved successfully!');
             } catch (error) {
                 console.error('Error saving path:', error);
@@ -115,7 +128,8 @@ function Map() {
                         ]
                     }}
                 >
-                    <RawPath pathData={currentPathData} />
+                    <RawPath pathData={currentRawPath} />
+                    <SnappedPath pathData={currentSnappedPath} />
                     {previousRawPaths.map((path, index) => (
                         <RawPath key={index} pathData={path} />
                     ))}
