@@ -4,7 +4,10 @@ async function setupDatabase() {
     const db = await openDB('PathDatabase', 1, {
         upgrade(db) {
             if (!db.objectStoreNames.contains('rawPaths')) {
-                db.createObjectStore('rawPaths', { keyPath: 'id', autoIncrement: true });
+                db.createObjectStore('rawPaths', { keyPath: 'sessionId', autoIncrement: true });
+            }
+            if (!db.objectStoreNames.contains('roadSegments')) {
+                db.createObjectStore('roadSegments', { keyPath: 'sessionId'});
             }
         },
     });
@@ -17,7 +20,8 @@ export async function addRawPath(path) {
         date: new Date().toISOString(),
         path: path
     };
-    return db.add('rawPaths', newEntry);
+    const sessionId = await db.add('rawPaths', newEntry);
+    return sessionId;
 }
 
 export async function getAllRawPaths() {
@@ -33,4 +37,23 @@ export async function deleteRawPath(id) {
 export async function clearRawPaths() {
     const db = await setupDatabase();
     return db.clear('rawPaths')
+}
+
+export async function addRoadSegments(sessionId, roadSegmentIds) {
+    const db = await setupDatabase();
+    const segmentData = {
+        sessionId: sessionId,
+        segmentIds: roadSegmentIds
+    };
+    return db.put('roadSegments', segmentData);
+}
+
+export async function getAllRoadSegments() {
+    const db = await setupDatabase();
+    return db.getAll('roadSegments');
+}
+
+export async function clearRoadSegments() {
+    const db = await setupDatabase();
+    return db.clear('roadSegments')
 }

@@ -3,7 +3,7 @@ import { GoogleMap, LoadScript } from '@react-google-maps/api';
 import TrackingControl from './TrackingControl';
 import RawPath from './RawPath';
 import SnappedPath from './SnappedPath';
-import { addRawPath, getAllRawPaths, deleteRawPath, clearRawPaths } from './IndexedDB';
+import { addRawPath, getAllRawPaths, addRoadSegments, getAllRoadSegments } from './IndexedDB';
 import { DownloadCSV } from './DownloadCSV';
 import { ClearDatabase } from './ClearDatabase';
 import { snapToRoads } from './RoadsUtils';
@@ -21,6 +21,7 @@ function Map() {
     const [currentRawPath, setCurrentRawPath] = useState([]);
     const [previousRawPaths, setPreviousRawPaths] = useState([]);
     const [currentSnappedPath, setCurrentSnappedPath] = useState([]);
+    const [currentRoadSegments, setCurrentRoadSegments] = useState([]);
 
     useEffect(() => {
         // Fetch initial geolocation
@@ -65,12 +66,12 @@ function Map() {
                         lng: position.coords.longitude
                     }]);
                     try {
-                        const [snappedPoint, placeId] = await snapToRoads(position.coords.latitude, position.coords.longitude)
+                        const [snappedPoint, roadSegment] = await snapToRoads(position.coords.latitude, position.coords.longitude)
                         setCurrentSnappedPath(prevPath => [...prevPath, {
                             lat: snappedPoint.latitude,
                             lng: snappedPoint.longitude
                         }])
-                        console.log(placeId)
+                        setCurrentRoadSegments(prevSegments => [...prevSegments, roadSegment])
                     } catch (error) {
                         console.error("Error snapping to road:", error);
                     }
@@ -95,7 +96,8 @@ function Map() {
             navigator.geolocation.clearWatch(watchId);
             setIsTracking(false);
             try {
-                await addRawPath(currentRawPath);
+                const sessionId = await addRawPath(currentRawPath);
+                await addRoadSegments(sessionId, currentRoadSegments)
                 console.log('Path saved successfully!');
             } catch (error) {
                 console.error('Error saving path:', error);

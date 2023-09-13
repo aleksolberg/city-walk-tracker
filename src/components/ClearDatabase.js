@@ -1,8 +1,9 @@
-import { clearRawPaths } from "./IndexedDB";
+import { clearRawPaths, clearRoadSegments } from "./IndexedDB";
 
 const clearDatabase = async () => {
     try {
         await clearRawPaths();
+        await clearRoadSegments();
         console.log("Database cleared successfully!");
     } catch (error) {
         console.error("Error clearing the database:", error);
