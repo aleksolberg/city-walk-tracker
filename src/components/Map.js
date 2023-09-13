@@ -99,7 +99,20 @@ function Map() {
                     zoom={15}
                     options={{
                         mapTypeControl: false,
-                        streetViewControl: false
+                        streetViewControl: false,
+                        fullscreenControl: false,
+                        styles: [
+                            {
+                                featureType: "poi",
+                                elementType: "labels",
+                                stylers: [{ visibility: "off" }]
+                            },
+                            {
+                                featureType: "transit",
+                                elementType: "labels",
+                                stylers: [{ visibility: "off" }]
+                            }
+                        ]
                     }}
                 >
                     <RawPath pathData={currentPathData} />
