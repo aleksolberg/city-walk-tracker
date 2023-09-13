@@ -7,7 +7,7 @@ function convertToCSV(paths) {
     paths.forEach(session => {
         console.log(session);
         session.path.forEach(coord => {
-            csvRows.push(`${session.id},${session.date},${coord.lat},${coord.lng}`);
+            csvRows.push(`${session.sessionId},${session.date},${coord.lat},${coord.lng}`);
         });
     });
 
