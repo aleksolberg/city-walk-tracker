@@ -21,7 +21,7 @@ function Map() {
     const [currentRawPath, setCurrentRawPath] = useState([]);
     const [previousRawPaths, setPreviousRawPaths] = useState([]);
     const [currentSnappedPath, setCurrentSnappedPath] = useState([]);
-    const [currentRoadSegments, setCurrentRoadSegments] = useState([]);
+    const [currentRoadSegments, setCurrentRoadSegments] = useState(new Set());
 
     useEffect(() => {
         // Fetch initial geolocation
@@ -71,7 +71,7 @@ function Map() {
                             lat: snappedPoint.latitude,
                             lng: snappedPoint.longitude
                         }])
-                        setCurrentRoadSegments(prevSegments => [...prevSegments, roadSegment])
+                        setCurrentRoadSegments(prevSegments => new Set(prevSegments.add(roadSegment)));
                     } catch (error) {
                         console.error("Error snapping to road:", error);
                     }
