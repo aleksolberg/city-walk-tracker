@@ -6,13 +6,16 @@ import SnappedPath from './SnappedPath';
 import { addRawPath, getAllRawPaths, addRoadSegments, getAllRoadSegments } from './IndexedDB';
 import { DownloadCSV } from './DownloadCSV';
 import { ClearDatabase } from './ClearDatabase';
-import { snapToRoads } from './RoadsUtils';
+import { snapPointToRoad, snapPointsToRoads } from './RoadsUtils';
+import { computeDistance } from './MapUtils';
+import Papa, { parse } from 'papaparse';
 
 const containerStyle = {
     width: '100vw',
     height: '100vh'
 };
 
+const geolocationThreshold = 5;
 let watchId = null;
 
 function Map() {
@@ -56,24 +59,50 @@ function Map() {
         fetchData();
     }, []);
 
+    /*useEffect(() => {
+        fetch('/testpaths/paths.csv')
+            .then(response => response.text())
+            .then(csv => {
+                return Papa.parse(csv, { header: true, skipEmptyLines: true }).data.map(
+                    point => ({
+                        lat: Number(point['Latitude']),
+                        lng: Number(point['Longitude'])
+                    })
+                ).filter((_,i) => i % 5 === 0).slice(0, 50); 
+            }).then(parsedData => {
+                setCurrentRawPath(parsedData)
+                return snapPointsToRoads(parsedData)}
+            ).then(placeIds => console.log(placeIds))
+    }, []);*/
+
 
     const startTracking = () => {
         if ("geolocation" in navigator) {
             watchId = navigator.geolocation.watchPosition(
                 async function (position) {
-                    setCurrentRawPath(prevPath => [...prevPath, {
+                    const newPoint = {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude
-                    }]);
-                    try {
-                        const [snappedPoint, roadSegment] = await snapToRoads(position.coords.latitude, position.coords.longitude)
-                        setCurrentSnappedPath(prevPath => [...prevPath, {
-                            lat: snappedPoint.latitude,
-                            lng: snappedPoint.longitude
-                        }])
-                        setCurrentRoadSegments(prevSegments => new Set(prevSegments.add(roadSegment)));
-                    } catch (error) {
-                        console.error("Error snapping to road:", error);
+                    };
+                    if (currentRawPath.length > 0) {
+                        const lastPoint = currentRawPath[currentRawPath.length - 1];
+                        const distance = computeDistance(lastPoint.lat, lastPoint.lng, newPoint.lat, newPoint.lng);
+
+                        if (distance > geolocationThreshold) { // Distance in meters
+                            setCurrentRawPath(prevPath => [...prevPath, newPoint]);
+                            try {
+                                const [snappedPoint, roadSegment] = await snapPointToRoad(newPoint.lat, newPoint.lng);
+                                setCurrentSnappedPath(prevPath => [...prevPath, {
+                                    lat: snappedPoint.latitude,
+                                    lng: snappedPoint.longitude
+                                }]);
+                                setCurrentRoadSegments(prevSegments => new Set(prevSegments.add(roadSegment)));
+                            } catch (error) {
+                                console.error("Error snapping to road:", error);
+                            }
+                        }
+                    } else {
+                        setCurrentRawPath(prevPath => [...prevPath, newPoint]);
                     }
                 },
                 function (error) {
@@ -90,6 +119,7 @@ function Map() {
             console.warn("Geolocation is not supported by this browser.");
         }
     };
+
 
     const stopTracking = async () => {
         if (watchId !== null) {
