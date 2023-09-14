@@ -15,7 +15,7 @@ const containerStyle = {
     height: '100vh'
 };
 
-const geolocationThreshold = 5;
+const geolocationThreshold = 10;
 let watchId = null;
 
 function Map() {
@@ -23,6 +23,7 @@ function Map() {
     const [isTracking, setIsTracking] = useState(false);
     const [currentRawPath, setCurrentRawPath] = useState([]);
     const [previousRawPaths, setPreviousRawPaths] = useState([]);
+    const [unsnappedPoints, setUnsnappedPoints] = useState([]);
     const [currentSnappedPath, setCurrentSnappedPath] = useState([]);
     const [currentRoadSegments, setCurrentRoadSegments] = useState(new Set());
 
@@ -79,31 +80,34 @@ function Map() {
     const startTracking = () => {
         if ("geolocation" in navigator) {
             watchId = navigator.geolocation.watchPosition(
-                async function (position) {
+                function (position) {
                     const newPoint = {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude
                     };
-                    if (currentRawPath.length > 0) {
-                        const lastPoint = currentRawPath[currentRawPath.length - 1];
-                        const distance = computeDistance(lastPoint.lat, lastPoint.lng, newPoint.lat, newPoint.lng);
-
-                        if (distance > geolocationThreshold) { // Distance in meters
-                            setCurrentRawPath(prevPath => [...prevPath, newPoint]);
-                            try {
-                                const [snappedPoint, roadSegment] = await snapPointToRoad(newPoint.lat, newPoint.lng);
-                                setCurrentSnappedPath(prevPath => [...prevPath, {
-                                    lat: snappedPoint.latitude,
-                                    lng: snappedPoint.longitude
-                                }]);
-                                setCurrentRoadSegments(prevSegments => new Set(prevSegments.add(roadSegment)));
-                            } catch (error) {
-                                console.error("Error snapping to road:", error);
+    
+                    setCurrentRawPath(prevPath => {
+                        if (prevPath.length > 0) {
+                            const lastPoint = prevPath[prevPath.length - 1];
+                            const distance = computeDistance(lastPoint.lat, lastPoint.lng, newPoint.lat, newPoint.lng);
+    
+                            if (distance > geolocationThreshold) {
+                                setUnsnappedPoints(prevUnsyncedPath => {
+                                    if (prevUnsyncedPath.length > 49) {
+                                        handleBulkSnapping(prevUnsyncedPath);
+                                        return [newPoint];
+                                    } else {
+                                        return [...prevUnsyncedPath, newPoint];
+                                    }
+                                })
+                                return [...prevPath, newPoint];  
+                            } else {
+                                return prevPath; 
                             }
+                        } else {
+                            return [...prevPath, newPoint];  // If no previous path, add newPoint
                         }
-                    } else {
-                        setCurrentRawPath(prevPath => [...prevPath, newPoint]);
-                    }
+                    });
                 },
                 function (error) {
                     console.error("Error while tracking: ", error);
@@ -119,7 +123,21 @@ function Map() {
             console.warn("Geolocation is not supported by this browser.");
         }
     };
-
+    
+    const handleBulkSnapping = async (points) => {
+        try {
+            const snappedPoints = await snapPointsToRoads(points);
+            setCurrentSnappedPath(prevSnappedPath => [...prevSnappedPath, ...snappedPoints.map(point => ({
+                lat: point.location.latitude,
+                lng: point.location.longitude
+            }))]);
+    
+            // Handle any additional state updates for road segments if required
+    
+        } catch (error) {
+            console.error("Error snapping to roads:", error);
+        }
+    };
 
     const stopTracking = async () => {
         if (watchId !== null) {
