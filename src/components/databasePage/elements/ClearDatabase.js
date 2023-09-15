@@ -1,4 +1,4 @@
-import { clearRawPaths, clearRoadSegments } from "./IndexedDB";
+import { clearRawPaths, clearRoadSegments } from "../databaseUtils/IndexedDB";
 
 const clearDatabase = async () => {
     try {

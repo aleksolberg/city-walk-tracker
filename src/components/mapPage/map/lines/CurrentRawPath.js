@@ -1,10 +1,11 @@
-import React from 'react';
 import { Polyline } from '@react-google-maps/api';
 
-function RawPath({ pathData }) {
-  return pathData.length > 1 ? (
-    <Polyline 
-      path={pathData} 
+
+function CurrentRawPath(props) {
+
+  return props.pathData.length > 0 ? (
+    <Polyline
+      path={props.pathData}
       options={{
         strokeColor: "#00FF00",
         strokeOpacity: 0.8,
@@ -14,4 +15,4 @@ function RawPath({ pathData }) {
   ) : null;
 }
 
-export default RawPath;
+export default CurrentRawPath;

@@ -1,4 +1,4 @@
-import { getAllRawPaths } from "./IndexedDB";
+import { getAllRawPaths } from "../databaseUtils/IndexedDB";
 
 function convertToCSV(paths) {
     const header = ['Session ID', 'Date', 'Latitude', 'Longitude'];
