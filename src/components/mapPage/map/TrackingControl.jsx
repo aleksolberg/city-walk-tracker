@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { computeDistance } from './MapUtils'
-import { addRawPath, addRoadSegments } from '../../databasePage/databaseUtils/IndexedDB';
-import { snapPointsToRoads } from './lines/linesUtils/RoadsUtils';
+import { saveRawPath, saveRoadSegments } from '../../databasePage/databaseUtils/IndexedDB';
+import { snapPointsToRoads } from './lines/linesUtils/RoadSnapping';
 
 const currentRoadSegments = new Set();
 const geolocationThreshold = 10;
@@ -10,7 +10,6 @@ let watchId = null;
 
 function TrackingControl(props) {
   const [unsnappedPoints, setUnsnappedPoints] = useState([]);
-  const [isTracking, setIsTracking] = useState(false);
 
   function startTracking() {
     if (!("geolocation" in navigator)) {
@@ -18,7 +17,7 @@ function TrackingControl(props) {
       return
     }
 
-    setIsTracking(true);
+    props.setIsTracking(true);
 
     watchId = navigator.geolocation.watchPosition(position => {
       const newPoint = {
@@ -57,14 +56,16 @@ function TrackingControl(props) {
   async function stopTracking() {
     if (unsnappedPoints.length > 1) {
       await handleBulkSnapping(unsnappedPoints);
+      setUnsnappedPoints([]);
     }
     if (watchId !== null) {
       navigator.geolocation.clearWatch(watchId);
-      setIsTracking(false);
+      props.setIsTracking(false);
       try {
-        const sessionId = await addRawPath(props.currentRawPath);
-        await addRoadSegments(sessionId, currentRoadSegments);
+        const sessionId = await saveRawPath(props.currentRawPath);
+        await saveRoadSegments(sessionId, currentRoadSegments);
         console.log('Path saved successfully!');
+        props.setCurrentRawPath([])
       } catch (error) {
         console.error('Error saving path:', error);
       }
@@ -78,6 +79,7 @@ function TrackingControl(props) {
         lat: point.location.latitude,
         lng: point.location.longitude
       }))]);
+      currentRoadSegments.add(...snappedPoints.map(point => point.placeId))
     } catch (error) {
       console.error("Error snapping to roads:", error);
     }
@@ -85,7 +87,7 @@ function TrackingControl(props) {
 
   return (
     <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 1 }}>
-      {!isTracking ? (
+      {!props.isTracking ? (
         <button onClick={startTracking}>Start Tracking</button>
       ) : (
         <button onClick={stopTracking}>Stop Tracking</button>

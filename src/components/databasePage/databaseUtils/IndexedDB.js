@@ -14,7 +14,7 @@ async function setupDatabase() {
     return db;
 }
 
-export async function addRawPath(path) {
+export async function saveRawPath(path) {
     const db = await setupDatabase();
     const newEntry = {
         date: new Date().toISOString(),
@@ -39,7 +39,7 @@ export async function clearRawPaths() {
     return db.clear('rawPaths')
 }
 
-export async function addRoadSegments(sessionId, roadSegmentIds) {
+export async function saveRoadSegments(sessionId, roadSegmentIds) {
     const db = await setupDatabase();
     const segmentData = {
         sessionId: sessionId,
