@@ -1,15 +1,14 @@
 import { useState } from 'react';
 import { computeDistance } from './MapUtils'
-import { saveRawPath, saveRoadSegments } from '../../databasePage/databaseUtils/IndexedDB';
+import { saveRawPath, saveSnappedPath } from '../../databasePage/databaseUtils/IndexedDB';
 import { snapPointsToRoads } from './lines/linesUtils/RoadSnapping';
+import { geolocationThreshold, unsnappedPointsSize } from '../../../config/constants';
 
-const currentRoadSegments = new Set();
-const geolocationThreshold = 10;
-const unsnappedPointsSize = 50;
 let watchId = null;
 
 function TrackingControl(props) {
   const [unsnappedPoints, setUnsnappedPoints] = useState([]);
+
 
   function startTracking() {
     if (!("geolocation" in navigator)) {
@@ -24,8 +23,15 @@ function TrackingControl(props) {
         lat: position.coords.latitude,
         lng: position.coords.longitude
       };
+      console.log(newPoint)
+
+      setTimeout(() => {
+        props.setUserLocation(newPoint);
+    }, 0);
+
       props.setCurrentRawPath(prevPoints => {
         if (prevPoints.length <= 0) {
+          setUnsnappedPoints([newPoint]);
           return [newPoint];
         }
 
@@ -33,10 +39,15 @@ function TrackingControl(props) {
         const distance = computeDistance(previousPoint.lat, previousPoint.lng, newPoint.lat, newPoint.lng);
 
         if (distance > geolocationThreshold) {
-          if (unsnappedPoints.length >= unsnappedPointsSize - 1) {
-            handleBulkSnapping([...unsnappedPoints, newPoint]);
-            setUnsnappedPoints([newPoint]);
-          }
+          setUnsnappedPoints(prevUnsnappedPoints => {
+            console.log(prevUnsnappedPoints)
+            if (prevUnsnappedPoints.length >= unsnappedPointsSize - 1){
+              handleBulkSnapping([...prevUnsnappedPoints, newPoint]);
+              return [newPoint]
+            } else {
+              return [...prevUnsnappedPoints, newPoint];
+            }
+          })
           return [...prevPoints, newPoint];
         } else {
           return prevPoints;
@@ -53,17 +64,22 @@ function TrackingControl(props) {
     )
   }
 
+
   async function stopTracking() {
+    let finalSnappedPoints = props.currentSnappedPath;
+
     if (unsnappedPoints.length > 1) {
-      await handleBulkSnapping(unsnappedPoints);
-      setUnsnappedPoints([]);
+        const snappedPoints = await handleBulkSnapping(unsnappedPoints);
+        finalSnappedPoints = [...finalSnappedPoints, ...snappedPoints];
+        setUnsnappedPoints([]);
     }
     if (watchId !== null) {
       navigator.geolocation.clearWatch(watchId);
       props.setIsTracking(false);
       try {
         const sessionId = await saveRawPath(props.currentRawPath);
-        await saveRoadSegments(sessionId, currentRoadSegments);
+        console.log(props.currentSnappedPath)
+        await saveSnappedPath(sessionId, finalSnappedPoints);
         console.log('Path saved successfully!');
         props.setCurrentRawPath([])
       } catch (error) {
@@ -72,18 +88,22 @@ function TrackingControl(props) {
     }
   };
 
+
   async function handleBulkSnapping(points) {
     try {
-      const snappedPoints = await snapPointsToRoads(points);
-      props.setCurrentSnappedPath(prevSnappedPath => [...prevSnappedPath, ...snappedPoints.map(point => ({
-        lat: point.location.latitude,
-        lng: point.location.longitude
-      }))]);
-      currentRoadSegments.add(...snappedPoints.map(point => point.placeId))
+        const snappedPoints = await snapPointsToRoads(points);
+        props.setCurrentSnappedPath(prevSnappedPath => [...prevSnappedPath, ...snappedPoints.map(point => ({
+            lat: point.location.latitude,
+            lng: point.location.longitude,
+            placeId: point.placeId
+        }))]);
+
+        return snappedPoints;
     } catch (error) {
-      console.error("Error snapping to roads:", error);
+        console.error("Error snapping to roads:", error);
     }
-  };
+};
+
 
   return (
     <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 1 }}>

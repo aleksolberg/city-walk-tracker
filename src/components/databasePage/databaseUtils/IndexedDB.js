@@ -1,21 +1,25 @@
 import { openDB } from 'idb';
 
-async function setupDatabase() {
-    const db = await openDB('PathDatabase', 1, {
-        upgrade(db) {
-            if (!db.objectStoreNames.contains('rawPaths')) {
-                db.createObjectStore('rawPaths', { keyPath: 'sessionId', autoIncrement: true });
-            }
-            if (!db.objectStoreNames.contains('roadSegments')) {
-                db.createObjectStore('roadSegments', { keyPath: 'sessionId'});
-            }
-        },
-    });
-    return db;
+let dbPromise = null;
+
+async function getDatabase() {
+    if (!dbPromise) {
+        dbPromise = openDB('PathDatabase', 1, {
+            upgrade(db) {
+                if (!db.objectStoreNames.contains('rawPaths')) {
+                    db.createObjectStore('rawPaths', { keyPath: 'sessionId', autoIncrement: true });
+                }
+                if (!db.objectStoreNames.contains('snappedPaths')) {
+                    db.createObjectStore('snappedPaths', { keyPath: 'sessionId' });
+                }
+            },
+        });
+    }
+    return dbPromise;
 }
 
 export async function saveRawPath(path) {
-    const db = await setupDatabase();
+    const db = await getDatabase();
     const newEntry = {
         date: new Date().toISOString(),
         path: path
@@ -25,35 +29,35 @@ export async function saveRawPath(path) {
 }
 
 export async function getAllRawPaths() {
-    const db = await setupDatabase();
+    const db = await getDatabase();
     return db.getAll('rawPaths');
 }
 
 export async function deleteRawPath(id) {
-    const db = await setupDatabase();
+    const db = await getDatabase();
     return db.delete('rawPaths', id);
 }
 
 export async function clearRawPaths() {
-    const db = await setupDatabase();
+    const db = await getDatabase();
     return db.clear('rawPaths')
 }
 
-export async function saveRoadSegments(sessionId, roadSegmentIds) {
-    const db = await setupDatabase();
+export async function saveSnappedPath(sessionId, snappedPath) {
+    const db = await getDatabase();
     const segmentData = {
         sessionId: sessionId,
-        segmentIds: roadSegmentIds
+        snappedPath: snappedPath
     };
-    return db.put('roadSegments', segmentData);
+    return db.put('snappedPaths', segmentData);
 }
 
-export async function getAllRoadSegments() {
-    const db = await setupDatabase();
-    return db.getAll('roadSegments');
+export async function getAllSnappedPaths() {
+    const db = await getDatabase();
+    return db.getAll('snappedPaths');
 }
 
-export async function clearRoadSegments() {
-    const db = await setupDatabase();
-    return db.clear('roadSegments')
+export async function clearSnappedPaths() {
+    const db = await getDatabase();
+    return db.clear('snappedPaths')
 }

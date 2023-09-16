@@ -1,11 +1,11 @@
 import { Polyline } from '@react-google-maps/api';
 
 
-function CurrentRawPath(props) {
+function CurrentRawPath({pathData}) {
 
-  return props.pathData.length > 0 ? (
+  return pathData.length > 0 ? (
     <Polyline
-      path={props.pathData}
+      path={pathData}
       options={{
         strokeColor: "#00FF00",
         strokeOpacity: 0.8,

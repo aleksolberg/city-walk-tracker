@@ -2,7 +2,7 @@ import { Polyline } from "@react-google-maps/api";
 import { useEffect, useState } from "react";
 import { getAllRawPaths } from "../../../databasePage/databaseUtils/IndexedDB";
 
-function PreviousRawPaths(props) {
+function PreviousRawPaths({refreshFlag}) {
     const [previousRawPaths, setPreviousRawPaths] = useState([]);
 
     useEffect(() => {
@@ -17,7 +17,7 @@ function PreviousRawPaths(props) {
         }
 
         fetchData();
-    }, [props.refreshFlag]);
+    }, [refreshFlag]);
 
     return previousRawPaths.length > 0 ? (
         previousRawPaths.map((prevPath, index) => (

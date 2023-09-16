@@ -34,10 +34,10 @@ async function handleDownload() {
     downloadCSV(csvData);
 }
 
-export function DownloadCSV() {
+export function DownloadRawPathCSV() {
     return (
         <div style={{ position: 'absolute', top: 40, left: 10, zIndex: 1 }}>
-            <button onClick={handleDownload}>Download CSV</button>
+            <button onClick={handleDownload}>Download Raw Paths</button>
         </div>
       );
 }
