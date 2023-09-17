@@ -27,6 +27,7 @@ function TrackingControl(props) {
 
       setTimeout(() => {
         props.setUserLocation(newPoint);
+        props.setCenter(newPoint);
     }, 0);
 
       props.setCurrentRawPath(prevPoints => {

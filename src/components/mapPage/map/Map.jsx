@@ -7,6 +7,7 @@ import { DownloadRawPathCSV } from '../../databasePage/elements/DownloadRawPathC
 import { DownloadSnappedPathCSV } from '../../databasePage/elements/DownloadSnappedPathCSV';
 import { ClearDatabase } from '../../databasePage/elements/ClearDatabase';
 import PreviousRawPaths from './lines/PreviousRawPaths';
+import PreviousSnappedPaths from './lines/PreviousSnappedPaths';
 //import { parseCSV } from '../../../testing/CSVPathParser';
 //import { snapPointsToRoads } from './lines/linesUtils/RoadSnapping';
 
@@ -94,6 +95,7 @@ function Map() {
                     <CurrentRawPath pathData={currentRawPath} />
                     <SnappedPath pathData={currentSnappedPath} />
                     <PreviousRawPaths refreshFlag={isTracking} />
+                    <PreviousSnappedPaths refreshFlag={isTracking} />
                 </GoogleMap>
                 <TrackingControl
                     currentRawPath={currentRawPath}
@@ -103,6 +105,7 @@ function Map() {
                     isTracking={isTracking}
                     setIsTracking={setIsTracking}
                     setUserLocation={setUserLocation}
+                    setCenter={setCenter}
                 />
                 <DownloadRawPathCSV />
                 <DownloadSnappedPathCSV />
