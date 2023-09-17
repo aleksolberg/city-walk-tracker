@@ -79,10 +79,10 @@ function TrackingControl(props) {
       props.setIsTracking(false);
       try {
         const sessionId = await saveRawPath(props.currentRawPath);
-        console.log(props.currentSnappedPath)
         await saveSnappedPath(sessionId, finalSnappedPoints);
         console.log('Path saved successfully!');
-        props.setCurrentRawPath([])
+        props.setCurrentRawPath([]);
+        props.setCurrentSnappedPath([]);
       } catch (error) {
         console.error('Error saving path:', error);
       }
