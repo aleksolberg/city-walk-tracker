@@ -16,5 +16,5 @@ export const isTrackingSlice = createSlice({
     }
 })
 
-export const { setIsTrackingTrue: setTrue, setIsTrackingFalse: setFalse } = isTrackingSlice.actions;
+export const { setIsTrackingTrue, setIsTrackingFalse } = isTrackingSlice.actions;
 export const isTrackingReducer = isTrackingSlice.reducer;
