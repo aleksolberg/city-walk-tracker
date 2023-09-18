@@ -1,9 +1,12 @@
 import { Polyline } from "@react-google-maps/api";
 import { useEffect, useState } from "react";
 import { getAllSnappedPaths } from "../../../databasePage/databaseUtils/IndexedDB";
+import { useSelector } from "react-redux";
 
-function PreviousSnappedPaths({refreshFlag}) {
+function PreviousSnappedPaths() {
     const [previousSnappedPaths, setPreviousSnappedPaths] = useState([]);
+
+    const isTracking = useSelector(state => state.isTracking.value);
 
     useEffect(() => {
         async function fetchData() {
@@ -18,7 +21,7 @@ function PreviousSnappedPaths({refreshFlag}) {
         }
 
         fetchData();
-    }, [refreshFlag]);
+    }, [isTracking]);
 
     return previousSnappedPaths.length > 0 ? (
         previousSnappedPaths.map((prevPath, index) => (

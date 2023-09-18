@@ -96,8 +96,8 @@ function Map() {
                     )}
                     <CurrentRawPath pathData={currentRawPath} />
                     <SnappedPath pathData={currentSnappedPath} />
-                    <PreviousRawPaths refreshFlag={isTracking} />
-                    <PreviousSnappedPaths refreshFlag={isTracking} />
+                    <PreviousRawPaths/>
+                    <PreviousSnappedPaths/>
                     <CurrentOSRMPath pathData={nearestNodes} />
                 </GoogleMap>
                 <TrackingControl

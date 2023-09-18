@@ -4,10 +4,15 @@ import { saveRawPath, saveSnappedPath } from '../../databasePage/databaseUtils/I
 import { snapPointsToRoads } from './lines/linesUtils/RoadSnapping';
 import { geolocationThreshold, unsnappedPointsSize } from '../../../config/constants';
 import { getNearestRoadNodes } from './lines/linesUtils/OSRM';
+import { useDispatch, useSelector } from 'react-redux';
+import { setIsTrackingTrue, setIsTrackingFalse } from '../../../redux/isTrackingSlice';
 
 let watchId = null;
 
 function TrackingControl(props) {
+  const isTracking = useSelector(state => state.isTracking.value);
+  const dispatch = useDispatch();
+
   const [unsnappedPoints, setUnsnappedPoints] = useState([]);
 
 
@@ -17,7 +22,7 @@ function TrackingControl(props) {
       return;
     }
 
-    props.setIsTracking(true);
+    dispatch(setIsTrackingTrue())
 
     watchId = navigator.geolocation.watchPosition(position => {
       const newPoint = {
@@ -78,7 +83,7 @@ function TrackingControl(props) {
     }
     if (watchId !== null) {
       navigator.geolocation.clearWatch(watchId);
-      props.setIsTracking(false);
+      dispatch(setIsTrackingFalse());
       try {
         const sessionId = await saveRawPath(props.currentRawPath);
         await saveSnappedPath(sessionId, finalSnappedPoints);
@@ -116,7 +121,7 @@ function TrackingControl(props) {
 
   return (
     <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 1 }}>
-      {!props.isTracking ? (
+      {!isTracking ? (
         <button onClick={startTracking}>Start Tracking</button>
       ) : (
         <button onClick={stopTracking}>Stop Tracking</button>
