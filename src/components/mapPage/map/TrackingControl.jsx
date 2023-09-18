@@ -3,6 +3,7 @@ import { computeDistance } from './MapUtils'
 import { saveRawPath, saveSnappedPath } from '../../databasePage/databaseUtils/IndexedDB';
 import { snapPointsToRoads } from './lines/linesUtils/RoadSnapping';
 import { geolocationThreshold, unsnappedPointsSize } from '../../../config/constants';
+import { getNearestRoadNodes } from './lines/linesUtils/OSRM';
 
 let watchId = null;
 
@@ -13,7 +14,7 @@ function TrackingControl(props) {
   function startTracking() {
     if (!("geolocation" in navigator)) {
       console.warn("Geolocation is not supported by this browser.");
-      return
+      return;
     }
 
     props.setIsTracking(true);
@@ -31,7 +32,7 @@ function TrackingControl(props) {
     }, 0);
 
       props.setCurrentRawPath(prevPoints => {
-        if (prevPoints.length <= 0) {
+        if (prevPoints.length < 1) {
           setUnsnappedPoints([newPoint]);
           return [newPoint];
         }
@@ -40,6 +41,7 @@ function TrackingControl(props) {
         const distance = computeDistance(previousPoint.lat, previousPoint.lng, newPoint.lat, newPoint.lng);
 
         if (distance > geolocationThreshold) {
+          handleNodes(newPoint);
           setUnsnappedPoints(prevUnsnappedPoints => {
             console.log(prevUnsnappedPoints)
             if (prevUnsnappedPoints.length >= unsnappedPointsSize - 1){
@@ -88,6 +90,12 @@ function TrackingControl(props) {
       }
     }
   };
+
+  async function handleNodes(newPoint) {
+    const newNodes = await getNearestRoadNodes(newPoint.lat, newPoint.lng, 3)
+    console.log(newNodes)
+    props.setNearestNodes(nearestNodes => nearestNodes.add(newNodes));
+  }
 
 
   async function handleBulkSnapping(points) {

@@ -8,6 +8,7 @@ import { DownloadSnappedPathCSV } from '../../databasePage/elements/DownloadSnap
 import { ClearDatabase } from '../../databasePage/elements/ClearDatabase';
 import PreviousRawPaths from './lines/PreviousRawPaths';
 import PreviousSnappedPaths from './lines/PreviousSnappedPaths';
+import CurrentOSRMPath from './lines/CurrentOSRMPath';
 //import { parseCSV } from '../../../testing/CSVPathParser';
 //import { snapPointsToRoads } from './lines/linesUtils/RoadSnapping';
 
@@ -22,12 +23,13 @@ function Map() {
     const [currentRawPath, setCurrentRawPath] = useState([]);
     const [isTracking, setIsTracking] = useState(false);
     const [userLocation, setUserLocation] = useState(null);
-
-    /*useEffect(() => {
-        console.log('currentRawPath updated:', currentRawPath);
-    }, [currentRawPath]);
+    const [nearestNodes, setNearestNodes] = useState(new Set());
 
     useEffect(() => {
+        console.log('nearestNodes updated:', nearestNodes);
+    }, [nearestNodes]);
+
+    /*useEffect(() => {
         parseCSV().then(path => {
             setCurrentRawPath(path.slice(0, 98));
             snapPointsToRoads(path.slice(0, 98)).then(snappedPoints => {
@@ -48,7 +50,7 @@ function Map() {
                     lng: position.coords.longitude
                 };
                 setCenter(userLoc);
-                setUserLocation(userLoc);  // <-- Add this line
+                setUserLocation(userLoc);
             },
                 error => { console.error("Error obtaining geolocation: ", error) }
             );
@@ -96,6 +98,7 @@ function Map() {
                     <SnappedPath pathData={currentSnappedPath} />
                     <PreviousRawPaths refreshFlag={isTracking} />
                     <PreviousSnappedPaths refreshFlag={isTracking} />
+                    <CurrentOSRMPath pathData={nearestNodes} />
                 </GoogleMap>
                 <TrackingControl
                     currentRawPath={currentRawPath}
@@ -106,6 +109,7 @@ function Map() {
                     setIsTracking={setIsTracking}
                     setUserLocation={setUserLocation}
                     setCenter={setCenter}
+                    setNearestNodes={setNearestNodes}
                 />
                 <DownloadRawPathCSV />
                 <DownloadSnappedPathCSV />
