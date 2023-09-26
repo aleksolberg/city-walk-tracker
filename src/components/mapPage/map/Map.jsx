@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { GoogleMap, LoadScript } from '@react-google-maps/api';
 import TrackingControl from './TrackingControl';
 import CurrentRawPath from './lines/CurrentRawPath';
-import SnappedPath from './lines/CurrentSnappedPath';
-import { DownloadRawPathCSV } from '../../databasePage/elements/DownloadRawPathCSV';
-import { DownloadSnappedPathCSV } from '../../databasePage/elements/DownloadSnappedPathCSV';
+import { DownloadRawPaths } from '../../databasePage/elements/DownloadRawPaths';
 import { ClearDatabase } from '../../databasePage/elements/ClearDatabase';
 import PreviousRawPaths from './lines/PreviousRawPaths';
-import PreviousSnappedPaths from './lines/PreviousSnappedPaths';
 import CurrentOSRMPath from './lines/CurrentOSRMPath';
+import { setCurrentPosition } from '../../../redux/currentPositionSlice';
+import { DownloadOsrmNodes } from '../../databasePage/elements/DownloadOsrmNodes';
 //import { parseCSV } from '../../../testing/CSVPathParser';
 //import { snapPointsToRoads } from './lines/linesUtils/RoadSnapping';
 
@@ -18,10 +18,13 @@ const containerStyle = {
 };
 
 function Map() {
-    const [center, setCenter] = useState(null);
-    const [currentSnappedPath, setCurrentSnappedPath] = useState([]);
-    const [isTracking, setIsTracking] = useState(false);
-    const [userLocation, setUserLocation] = useState(null);
+    const dispatch = useDispatch();
+    const currentPosition = useSelector(state => state.currentPosition.value);
+
+    //const [center, setCenter] = useState(null);
+    //const [currentSnappedPath, setCurrentSnappedPath] = useState([]);
+    //const [isTracking, setIsTracking] = useState(false);
+    //const [userLocation, setUserLocation] = useState(null);
 
     /*useEffect(() => {
         parseCSV().then(path => {
@@ -35,22 +38,32 @@ function Map() {
         })
     }, [])*/
 
-    // Fetch initial location and set center
     useEffect(() => {
-        if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(position => {
-                const userLoc = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
-                setCenter(userLoc);
-                setUserLocation(userLoc);
-            },
-                error => { console.error("Error obtaining geolocation: ", error) }
-            );
-        } else {
+        if (!("geolocation" in navigator)) {
             console.warn("Geolocation is not supported by this browser.");
+            return;
         }
+
+        const watchId = navigator.geolocation.watchPosition(position => {
+            const newPoint = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+
+            dispatch(setCurrentPosition(newPoint));
+
+        }, error => {
+            console.error("Error while tracking: ", error);
+        },
+            {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 5000
+            }
+        );
+
+        // Clear the watch when the component unmounts.
+        return () => navigator.geolocation.clearWatch(watchId);
     }, []);
 
 
@@ -59,7 +72,7 @@ function Map() {
             <div style={{ position: 'relative' }}>
                 <GoogleMap
                     mapContainerStyle={containerStyle}
-                    center={center || undefined}
+                    center={currentPosition || undefined}
                     zoom={15}
                     options={{
                         mapTypeControl: false,
@@ -79,31 +92,13 @@ function Map() {
                         ]
                     }}
                 >
-                    {userLocation && (
-                        <Marker
-                            position={userLocation}
-                            icon={{
-                                url: "bluedot.png",  // You can use a blue dot icon image
-                                scaledSize: new window.google.maps.Size(5, 5)  // Adjust size as needed
-                            }}
-                        />
-                    )}
-                    <CurrentRawPath/>
-                    <SnappedPath pathData={currentSnappedPath} />
-                    <PreviousRawPaths/>
-                    <PreviousSnappedPaths/>
-                    <CurrentOSRMPath/>
+                    <CurrentRawPath />
+                    <PreviousRawPaths />
+                    <CurrentOSRMPath />
                 </GoogleMap>
-                <TrackingControl
-                    currentSnappedPath={currentSnappedPath}
-                    setCurrentSnappedPath={setCurrentSnappedPath}
-                    isTracking={isTracking}
-                    setIsTracking={setIsTracking}
-                    setUserLocation={setUserLocation}
-                    setCenter={setCenter}
-                />
-                <DownloadRawPathCSV />
-                <DownloadSnappedPathCSV />
+                <TrackingControl />
+                <DownloadRawPaths />
+                <DownloadOsrmNodes />
                 <ClearDatabase />
             </div>
         </LoadScript>

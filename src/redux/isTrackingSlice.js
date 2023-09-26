@@ -3,13 +3,12 @@ import { createSlice } from "@reduxjs/toolkit";
 export const isTrackingSlice = createSlice({
     name: 'isTracking',
     initialState: {
-        value: false,
+        value: null,
     },
     reducers: {
         setIsTrackingTrue: state => {
             state.value = true;
         },
-
         setIsTrackingFalse: state => {
             state.value = false;
         }

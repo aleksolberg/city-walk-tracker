@@ -7,10 +7,10 @@ async function getDatabase() {
         dbPromise = openDB('PathDatabase', 1, {
             upgrade(db) {
                 if (!db.objectStoreNames.contains('rawPaths')) {
-                    db.createObjectStore('rawPaths', { keyPath: 'sessionId', autoIncrement: true });
+                    db.createObjectStore('rawPaths', { keyPath: 'sessionId' });
                 }
-                if (!db.objectStoreNames.contains('snappedPaths')) {
-                    db.createObjectStore('snappedPaths', { keyPath: 'sessionId' });
+                if (!db.objectStoreNames.contains('osrmNodes')) {
+                    db.createObjectStore('osrmNodes', { keyPath: 'sessionId' });
                 }
             },
         });
@@ -18,14 +18,22 @@ async function getDatabase() {
     return dbPromise;
 }
 
-export async function saveRawPath(path) {
+export async function getAllSessionIds() {
+    const db = await getDatabase();
+    const tx = db.transaction('rawPaths', 'readonly');
+    const store = tx.objectStore('rawPaths');
+    const keys = await store.getAllKeys();
+    return keys;
+}
+
+export async function saveRawPath(sessionId, path) {
     const db = await getDatabase();
     const newEntry = {
+        sessionId: sessionId,
         date: new Date().toISOString(),
         path: path
     };
-    const sessionId = await db.add('rawPaths', newEntry);
-    return sessionId;
+    return db.add('rawPaths', newEntry);
 }
 
 export async function getAllRawPaths() {
@@ -43,21 +51,21 @@ export async function clearRawPaths() {
     return db.clear('rawPaths')
 }
 
-export async function saveSnappedPath(sessionId, snappedPath) {
+export async function saveOsrmNodes(sessionId, osrmNodes) {
     const db = await getDatabase();
-    const segmentData = {
+    const nodeData = {
         sessionId: sessionId,
-        snappedPath: snappedPath
+        nodes: osrmNodes
     };
-    return db.put('snappedPaths', segmentData);
+    return db.put('osrmNodes', nodeData);
 }
 
-export async function getAllSnappedPaths() {
+export async function getAllOsrmNodes() {
     const db = await getDatabase();
-    return db.getAll('snappedPaths');
+    return db.getAll('osrmNodes');
 }
 
-export async function clearSnappedPaths() {
+export async function clearOsrmNodes() {
     const db = await getDatabase();
-    return db.clear('snappedPaths')
+    return db.clear('osrmNodes')
 }

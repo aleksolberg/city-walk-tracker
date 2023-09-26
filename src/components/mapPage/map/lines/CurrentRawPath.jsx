@@ -1,9 +1,32 @@
 import { Polyline } from '@react-google-maps/api';
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { saveRawPath } from '../../../databasePage/databaseUtils/IndexedDB';
 
 
 function CurrentRawPath() {
-  const currentRawPath = useSelector(state => state.currentRawPath.value);
+
+  const isTracking = useSelector(state => state.isTracking.value);
+  const lastLoggedPosition = useSelector(state => state.lastLoggedPosition.value);
+  const sessionId = useSelector(state => state.session.id);
+
+  const [currentRawPath, setCurrentRawPath] = useState([]);
+
+
+  useEffect(() => {
+    if (lastLoggedPosition != null) {
+      console.log(lastLoggedPosition)
+      console.log(currentRawPath)
+      setCurrentRawPath(prevPath => [...prevPath, lastLoggedPosition])
+    }
+  }, [lastLoggedPosition])
+
+
+  useEffect(() => {
+    if (!isTracking && currentRawPath.length > 0) {
+      saveRawPath(sessionId, currentRawPath);
+    }
+  }, [isTracking])
 
   return currentRawPath.length > 0 ? (
     <Polyline
