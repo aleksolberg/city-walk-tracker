@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { GoogleMap, LoadScript } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import TrackingControl from './TrackingControl';
 import CurrentRawPath from './lines/CurrentRawPath';
 import { DownloadRawPaths } from '../../databasePage/elements/DownloadRawPaths';
@@ -92,6 +92,15 @@ function Map() {
                         ]
                     }}
                 >
+                    {currentPosition && (
+                        <Marker
+                            position={currentPosition}
+                            icon={{
+                                url: "bluedot.png",  // You can use a blue dot icon image
+                                scaledSize: new window.google.maps.Size(5, 5)  // Adjust size as needed
+                            }}
+                        />
+                    )}
                     <CurrentRawPath />
                     <PreviousRawPaths />
                     <CurrentOSRMPath />
