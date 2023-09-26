@@ -12,7 +12,6 @@ function PreviousSnappedPaths() {
         async function fetchData() {
             try {
                 const pathsFromDB = await getAllSnappedPaths();
-                console.log(pathsFromDB)
                 setPreviousSnappedPaths(pathsFromDB);
                 console.log(`Loaded ${pathsFromDB.length} snapped paths from database.`)
             } catch (error) {

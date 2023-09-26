@@ -6,11 +6,15 @@ import { geolocationThreshold, unsnappedPointsSize } from '../../../config/const
 import { getNearestRoadNodes } from './lines/linesUtils/OSRM';
 import { useDispatch, useSelector } from 'react-redux';
 import { setIsTrackingTrue, setIsTrackingFalse } from '../../../redux/isTrackingSlice';
+import { addPointToCurrentRawPath, clearCurrentRawPath } from '../../../redux/currentRawPathSlice';
+import { addNodeToCurrentNodes, clearCurrentNodes } from '../../../redux/currentNodesSlice';
 
 let watchId = null;
+let lastLoggedPoint = null;
 
 function TrackingControl(props) {
   const isTracking = useSelector(state => state.isTracking.value);
+
   const dispatch = useDispatch();
 
   const [unsnappedPoints, setUnsnappedPoints] = useState([]);
@@ -29,38 +33,32 @@ function TrackingControl(props) {
         lat: position.coords.latitude,
         lng: position.coords.longitude
       };
-      console.log(newPoint)
 
       setTimeout(() => {
         props.setUserLocation(newPoint);
         props.setCenter(newPoint);
-    }, 0);
+      }, 0);
 
-      props.setCurrentRawPath(prevPoints => {
-        if (prevPoints.length < 1) {
-          setUnsnappedPoints([newPoint]);
-          return [newPoint];
-        }
-
-        const previousPoint = prevPoints[prevPoints.length - 1];
-        const distance = computeDistance(previousPoint.lat, previousPoint.lng, newPoint.lat, newPoint.lng);
-
+      if (lastLoggedPoint === null) { // This is the first point on the path
+        setUnsnappedPoints([newPoint]); // Remove?
+        dispatch(addPointToCurrentRawPath(newPoint));
+        handleNearbyNodes(newPoint);
+        lastLoggedPoint = newPoint;
+        console.log(lastLoggedPoint)
+      } else {
+        const distance = computeDistance(lastLoggedPoint.lat, lastLoggedPoint.lng, newPoint.lat, newPoint.lng);
         if (distance > geolocationThreshold) {
-          handleNodes(newPoint);
-          setUnsnappedPoints(prevUnsnappedPoints => {
-            console.log(prevUnsnappedPoints)
-            if (prevUnsnappedPoints.length >= unsnappedPointsSize - 1){
+          handleNearbyNodes(newPoint);
+          setUnsnappedPoints(prevUnsnappedPoints => { // Remove?
+            if (prevUnsnappedPoints.length >= unsnappedPointsSize - 1) {
               handleBulkSnapping([...prevUnsnappedPoints, newPoint]);
               return [newPoint]
             } else {
               return [...prevUnsnappedPoints, newPoint];
             }
           })
-          return [...prevPoints, newPoint];
-        } else {
-          return prevPoints;
         }
-      })
+      }
     }, error => {
       console.error("Error while tracking: ", error);
     },
@@ -77,18 +75,20 @@ function TrackingControl(props) {
     let finalSnappedPoints = props.currentSnappedPath;
 
     if (unsnappedPoints.length > 1) {
-        const snappedPoints = await handleBulkSnapping(unsnappedPoints);
-        finalSnappedPoints = [...finalSnappedPoints, ...snappedPoints];
-        setUnsnappedPoints([]);
+      const snappedPoints = await handleBulkSnapping(unsnappedPoints);
+      finalSnappedPoints = [...finalSnappedPoints, ...snappedPoints];
+      setUnsnappedPoints([]);
     }
     if (watchId !== null) {
       navigator.geolocation.clearWatch(watchId);
+      lastLoggedPoint = null;
       dispatch(setIsTrackingFalse());
       try {
         const sessionId = await saveRawPath(props.currentRawPath);
         await saveSnappedPath(sessionId, finalSnappedPoints);
         console.log('Path saved successfully!');
-        props.setCurrentRawPath([]);
+        dispatch(clearCurrentRawPath());
+        dispatch(clearCurrentNodes());
         props.setCurrentSnappedPath([]);
       } catch (error) {
         console.error('Error saving path:', error);
@@ -96,27 +96,31 @@ function TrackingControl(props) {
     }
   };
 
-  async function handleNodes(newPoint) {
+  async function handleNearbyNodes(newPoint) {
     const newNodes = await getNearestRoadNodes(newPoint.lat, newPoint.lng, 3)
     console.log(newNodes)
-    props.setNearestNodes(nearestNodes => nearestNodes.add(newNodes));
+    if (newNodes.length > 0) {
+      newNodes.forEach(element => {
+        dispatch(addNodeToCurrentNodes(element));
+      });
+    }
   }
 
 
   async function handleBulkSnapping(points) {
     try {
-        const snappedPoints = await snapPointsToRoads(points);
-        props.setCurrentSnappedPath(prevSnappedPath => [...prevSnappedPath, ...snappedPoints.map(point => ({
-            lat: point.location.latitude,
-            lng: point.location.longitude,
-            placeId: point.placeId
-        }))]);
+      const snappedPoints = await snapPointsToRoads(points);
+      props.setCurrentSnappedPath(prevSnappedPath => [...prevSnappedPath, ...snappedPoints.map(point => ({
+        lat: point.location.latitude,
+        lng: point.location.longitude,
+        placeId: point.placeId
+      }))]);
 
-        return snappedPoints;
+      return snappedPoints;
     } catch (error) {
-        console.error("Error snapping to roads:", error);
+      console.error("Error snapping to roads:", error);
     }
-};
+  };
 
 
   return (

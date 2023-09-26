@@ -1,11 +1,13 @@
 import { Polyline } from '@react-google-maps/api';
+import { useSelector } from 'react-redux';
 
 
-function CurrentRawPath({pathData}) {
+function CurrentRawPath() {
+  const currentRawPath = useSelector(state => state.currentRawPath.value);
 
-  return pathData.length > 0 ? (
+  return currentRawPath.length > 0 ? (
     <Polyline
-      path={pathData}
+      path={currentRawPath}
       options={{
         strokeColor: "#00FF00",
         strokeOpacity: 0.8,

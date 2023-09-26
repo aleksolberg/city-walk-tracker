@@ -20,14 +20,8 @@ const containerStyle = {
 function Map() {
     const [center, setCenter] = useState(null);
     const [currentSnappedPath, setCurrentSnappedPath] = useState([]);
-    const [currentRawPath, setCurrentRawPath] = useState([]);
     const [isTracking, setIsTracking] = useState(false);
     const [userLocation, setUserLocation] = useState(null);
-    const [nearestNodes, setNearestNodes] = useState(new Set());
-
-    useEffect(() => {
-        console.log('nearestNodes updated:', nearestNodes);
-    }, [nearestNodes]);
 
     /*useEffect(() => {
         parseCSV().then(path => {
@@ -94,22 +88,19 @@ function Map() {
                             }}
                         />
                     )}
-                    <CurrentRawPath pathData={currentRawPath} />
+                    <CurrentRawPath/>
                     <SnappedPath pathData={currentSnappedPath} />
                     <PreviousRawPaths/>
                     <PreviousSnappedPaths/>
-                    <CurrentOSRMPath pathData={nearestNodes} />
+                    <CurrentOSRMPath/>
                 </GoogleMap>
                 <TrackingControl
-                    currentRawPath={currentRawPath}
-                    setCurrentRawPath={setCurrentRawPath}
                     currentSnappedPath={currentSnappedPath}
                     setCurrentSnappedPath={setCurrentSnappedPath}
                     isTracking={isTracking}
                     setIsTracking={setIsTracking}
                     setUserLocation={setUserLocation}
                     setCenter={setCenter}
-                    setNearestNodes={setNearestNodes}
                 />
                 <DownloadRawPathCSV />
                 <DownloadSnappedPathCSV />
