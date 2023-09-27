@@ -26,13 +26,19 @@ function CurrentOSRMPath() {
   }, [isTracking, sessionId])
 
   async function handleNearbyNodes(newPoint) {
-    console.log("hhh")
     const newNodes = await getNearestRoadNodes(newPoint.lat, newPoint.lng, 3)
-    console.log(newNodes)
     if (newNodes.length > 0) {
-      setCurrentNodes(prevNodes => [...prevNodes, ...newNodes]);
+      // Filtering out the duplicates
+      const uniqueNewNodes = newNodes.filter(newNode => {
+        const newNodeId = `${newNode.lat},${newNode.lng}`;
+        return !currentNodes.some(existingNode => `${existingNode.lat},${existingNode.lng}` === newNodeId);
+      });
+      
+      // Adding only unique nodes
+      if(uniqueNewNodes.length > 0) setCurrentNodes(prevNodes => [...prevNodes, ...uniqueNewNodes]);
     }
-  }
+}
+
 
   return (
     <>
