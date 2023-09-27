@@ -14,7 +14,7 @@ function CurrentOSRMNodes() {
 
 
   useEffect(() => {
-    if (lastLoggedPosition != null) {
+    if (isTracking && lastLoggedPosition != null) {
       handleNearbyNodes(lastLoggedPosition);
     }
   }, [lastLoggedPosition])
@@ -36,8 +36,8 @@ function CurrentOSRMNodes() {
     if (newNodes.length > 0) {
       // Filtering out the duplicates
       const uniqueNewNodes = newNodes.filter(newNode => {
-        const newNodeId = `${newNode.lat},${newNode.lng}`;
-        return !currentNodes.some(existingNode => `${existingNode.lat},${existingNode.lng}` === newNodeId);
+        const newNodeId = `${newNode.nodeIds}`;
+        return !currentNodes.some(existingNode => `${existingNode.nodeIds}` === newNodeId);
       });
       
       if(uniqueNewNodes.length > 0) setCurrentNodes(prevNodes => [...prevNodes, ...uniqueNewNodes]);
