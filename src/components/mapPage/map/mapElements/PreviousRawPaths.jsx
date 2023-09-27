@@ -9,17 +9,19 @@ function PreviousRawPaths() {
     const isTracking = useSelector(state => state.isTracking.value);
 
     useEffect(() => {
-        async function fetchData() {
-            try {
-                const pathsFromDB = await getAllRawPaths();
-                setPreviousRawPaths(pathsFromDB);
-                console.log(`Loaded ${pathsFromDB.length} raw paths from database.`)
-            } catch (error) {
-                console.error('Error fetching paths:', error);
+        if (!isTracking) {
+            async function fetchData() {
+                try {
+                    const pathsFromDB = await getAllRawPaths();
+                    setPreviousRawPaths(pathsFromDB);
+                    console.log(`Loaded ${pathsFromDB.length} raw paths from database.`)
+                } catch (error) {
+                    console.error('Error fetching paths:', error);
+                }
             }
-        }
 
-        fetchData();
+            fetchData();
+        }
     }, [isTracking]);
 
     return previousRawPaths.length > 0 ? (

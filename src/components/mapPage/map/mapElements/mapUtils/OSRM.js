@@ -12,7 +12,7 @@ export async function getNearestRoadNodes(lat, lng, numNodes) {
         .map(waypoint => ({
             lat: waypoint.location[1],
             lng: waypoint.location[0],
-            nodes: waypoint.nodes
+            nodeIds: waypoint.nodes
         }));
     }
 }

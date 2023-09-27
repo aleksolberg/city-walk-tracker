@@ -2,13 +2,14 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import TrackingControl from './TrackingControl';
-import CurrentRawPath from './lines/CurrentRawPath';
+import CurrentRawPath from './mapElements/CurrentRawPath';
 import { DownloadRawPaths } from '../../databasePage/elements/DownloadRawPaths';
 import { ClearDatabase } from '../../databasePage/elements/ClearDatabase';
-import PreviousRawPaths from './lines/PreviousRawPaths';
-import CurrentOSRMPath from './lines/CurrentOSRMPath';
+import PreviousRawPaths from './mapElements/PreviousRawPaths';
+import CurrentOSRMNodes from './mapElements/CurrentOSRMNodes';
 import { setCurrentPosition } from '../../../redux/currentPositionSlice';
 import { DownloadOsrmNodes } from '../../databasePage/elements/DownloadOsrmNodes';
+import PreviousOSRMNodes from './mapElements/PreviousOSRMNodes';
 //import { parseCSV } from '../../../testing/CSVPathParser';
 //import { snapPointsToRoads } from './lines/linesUtils/RoadSnapping';
 
@@ -103,7 +104,8 @@ function Map() {
                     )}
                     <CurrentRawPath />
                     <PreviousRawPaths />
-                    <CurrentOSRMPath />
+                    <CurrentOSRMNodes />
+                    <PreviousOSRMNodes />
                 </GoogleMap>
                 <TrackingControl />
                 <DownloadRawPaths />

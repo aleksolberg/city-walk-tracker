@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { computeDistance } from './MapUtils'
+import { computeDistance } from './mapElements/mapUtils/MapUtils'
 import { geolocationThreshold } from '../../../config/constants';
 import { useDispatch, useSelector } from 'react-redux';
 import { setIsTrackingTrue, setIsTrackingFalse } from '../../../redux/isTrackingSlice';
@@ -21,7 +21,7 @@ function TrackingControl(props) {
       } else {
         const distance = computeDistance(lastLoggedPosition.lat, lastLoggedPosition.lng, currentPosition.lat, currentPosition.lng);
         if (distance > geolocationThreshold) {
-          dispatch(setLastLoggedPosition)
+          dispatch(setLastLoggedPosition(currentPosition));
         }
       }
     }

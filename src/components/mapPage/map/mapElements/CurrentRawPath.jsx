@@ -15,8 +15,6 @@ function CurrentRawPath() {
 
   useEffect(() => {
     if (lastLoggedPosition != null) {
-      console.log(lastLoggedPosition)
-      console.log(currentRawPath)
       setCurrentRawPath(prevPath => [...prevPath, lastLoggedPosition])
     }
   }, [lastLoggedPosition])
@@ -25,6 +23,7 @@ function CurrentRawPath() {
   useEffect(() => {
     if (!isTracking && currentRawPath.length > 0) {
       saveRawPath(sessionId, currentRawPath);
+      setCurrentRawPath([]);
     }
   }, [isTracking])
 
