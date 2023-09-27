@@ -74,12 +74,12 @@ function Map() {
                         ]
                     }}
                 >
-                    {currentPosition && (
+                    {currentPosition && window.google && (
                         <Marker
                             position={currentPosition}
                             icon={{
-                                url: "bluedot.png",  // You can use a blue dot icon image
-                                scaledSize: new window.google.maps.Size(5, 5)  // Adjust size as needed
+                                url: "bluedot.png",
+                                scaledSize: new window.google.maps.Size(10, 10)
                             }}
                         />
                     )}
