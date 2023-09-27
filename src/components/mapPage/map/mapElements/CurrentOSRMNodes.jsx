@@ -21,7 +21,6 @@ function CurrentOSRMNodes() {
 
 
   useEffect(() => {
-    console.log(currentNodes)
     if (!isTracking && currentNodes.length > 0) {
       if (sessionId != null) {
         saveOsrmNodes(sessionId, currentNodes);

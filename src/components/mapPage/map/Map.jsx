@@ -10,8 +10,6 @@ import CurrentOSRMNodes from './mapElements/CurrentOSRMNodes';
 import { setCurrentPosition } from '../../../redux/currentPositionSlice';
 import { DownloadOsrmNodes } from '../../databasePage/elements/DownloadOsrmNodes';
 import PreviousOSRMNodes from './mapElements/PreviousOSRMNodes';
-//import { parseCSV } from '../../../testing/CSVPathParser';
-//import { snapPointsToRoads } from './lines/linesUtils/RoadSnapping';
 
 const containerStyle = {
     width: '100vw',
@@ -21,23 +19,6 @@ const containerStyle = {
 function Map() {
     const dispatch = useDispatch();
     const currentPosition = useSelector(state => state.currentPosition.value);
-
-    //const [center, setCenter] = useState(null);
-    //const [currentSnappedPath, setCurrentSnappedPath] = useState([]);
-    //const [isTracking, setIsTracking] = useState(false);
-    //const [userLocation, setUserLocation] = useState(null);
-
-    /*useEffect(() => {
-        parseCSV().then(path => {
-            setCurrentRawPath(path.slice(0, 98));
-            snapPointsToRoads(path.slice(0, 98)).then(snappedPoints => {
-                setCurrentSnappedPath(prevSnappedPath => [...prevSnappedPath, ...snappedPoints.map(point => ({
-                    lat: point.location.latitude,
-                    lng: point.location.longitude
-                  }))])}
-            )
-        })
-    }, [])*/
 
     useEffect(() => {
         if (!("geolocation" in navigator)) {
