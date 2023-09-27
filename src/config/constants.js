@@ -1,2 +1,2 @@
 export const geolocationThreshold = 20; // meters
-export const nodeDistanceThreshold = 20
+export const nodeDistanceThreshold = 20 
