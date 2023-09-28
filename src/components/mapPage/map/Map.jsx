@@ -59,10 +59,12 @@ function Map() {
                     center={followUser ? currentPosition : undefined || undefined}
                     zoom={15}
                     onDragStart={() => setFollowUser(false)}
+                    clickableIcons={false}
                     options={{
                         mapTypeControl: false,
                         streetViewControl: false,
                         fullscreenControl: false,
+                        gestureHandling: "greedy",
                         styles: [
                             {
                                 featureType: "poi",
@@ -95,7 +97,7 @@ function Map() {
                 <DownloadRawPaths />
                 <DownloadOsrmNodes />
                 <ClearDatabase />
-                <div style={{ position: 'absolute', bottom: 30, left: 10, zIndex: 1 }}>
+                <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }}>
                     <button onClick={() => setFollowUser(true)}>Follow User</button>
                 </div >
             </div>
