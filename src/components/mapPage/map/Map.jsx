@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import TrackingControl from './TrackingControl';
@@ -19,6 +19,8 @@ const containerStyle = {
 function Map() {
     const dispatch = useDispatch();
     const currentPosition = useSelector(state => state.currentPosition.value);
+
+    const [followUser, setFollowUser] = useState(true);
 
     useEffect(() => {
         if (!("geolocation" in navigator)) {
@@ -54,8 +56,9 @@ function Map() {
             <div style={{ position: 'relative' }}>
                 <GoogleMap
                     mapContainerStyle={containerStyle}
-                    center={currentPosition || undefined}
+                    center={followUser ? currentPosition : undefined || undefined}
                     zoom={15}
+                    onDragStart={() => setFollowUser(false)}
                     options={{
                         mapTypeControl: false,
                         streetViewControl: false,
@@ -92,6 +95,9 @@ function Map() {
                 <DownloadRawPaths />
                 <DownloadOsrmNodes />
                 <ClearDatabase />
+                <div style={{ position: 'absolute', bottom: 30, left: 10, zIndex: 1 }}>
+                    <button onClick={() => setFollowUser(true)}>Follow User</button>
+                </div >
             </div>
         </LoadScript>
     );
