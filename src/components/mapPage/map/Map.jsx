@@ -1,15 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
-import TrackingControl from './TrackingControl';
 import CurrentRawPath from './mapElements/CurrentRawPath';
-import { DownloadRawPaths } from '../../databasePage/elements/DownloadRawPaths';
-import { ClearDatabase } from '../../databasePage/elements/ClearDatabase';
 import PreviousRawPaths from './mapElements/PreviousRawPaths';
 import CurrentOSRMNodes from './mapElements/CurrentOSRMNodes';
 import { setCurrentPosition } from '../../../redux/currentPositionSlice';
-import { DownloadOsrmNodes } from '../../databasePage/elements/DownloadOsrmNodes';
 import PreviousOSRMNodes from './mapElements/PreviousOSRMNodes';
+import { setIsFollowingUserFalse } from '../../../redux/isFollowingUserSlice';
 
 const containerStyle = {
     width: '100vw',
@@ -19,8 +16,7 @@ const containerStyle = {
 function Map() {
     const dispatch = useDispatch();
     const currentPosition = useSelector(state => state.currentPosition.value);
-
-    const [followUser, setFollowUser] = useState(true);
+    const isFollowingUser = useSelector(state => state.isFollowingUser.value);
 
     useEffect(() => {
         if (!("geolocation" in navigator)) {
@@ -56,9 +52,13 @@ function Map() {
             <div style={{ position: 'relative' }}>
                 <GoogleMap
                     mapContainerStyle={containerStyle}
-                    center={followUser ? currentPosition : undefined || undefined}
+                    center={isFollowingUser ? currentPosition : undefined || undefined}
                     zoom={15}
-                    onDragStart={() => setFollowUser(false)}
+                    onDragStart={() => {
+                        if (isFollowingUser) {
+                            dispatch(setIsFollowingUserFalse())
+                        }
+                    }}
                     clickableIcons={false}
                     options={{
                         mapTypeControl: false,
@@ -93,15 +93,9 @@ function Map() {
                     <CurrentOSRMNodes />
                     <PreviousOSRMNodes />
                 </GoogleMap>
-                <TrackingControl />
-                <DownloadRawPaths />
-                <DownloadOsrmNodes />
-                <ClearDatabase />
-                <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }}>
-                    <button onClick={() => setFollowUser(true)}>Follow User</button>
-                </div >
             </div>
         </LoadScript>
+
     );
 }
 

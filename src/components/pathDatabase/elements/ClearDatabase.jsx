@@ -1,9 +1,9 @@
-import { clearOsrmNodes, clearRawPaths } from "../databaseUtils/IndexedDB";
+import { clearOsrmSessions, clearRawPaths } from "../databaseUtils/IndexedDB";
 
 const clearDatabase = async () => {
     try {
         await clearRawPaths();
-        await clearOsrmNodes();
+        await clearOsrmSessions();
         console.log("Database cleared successfully!");
     } catch (error) {
         console.error("Error clearing the database:", error);

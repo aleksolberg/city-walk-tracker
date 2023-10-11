@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Circle } from '@react-google-maps/api';
 import { useSelector } from 'react-redux';
-import { getNearestRoadNodes } from './mapUtils/OSRM';
-import { saveOsrmNodes } from '../../../databasePage/databaseUtils/IndexedDB';
+import { getNearestRoadNodes } from '../mapUtils/OSRM';
+import { saveOsrmNodes } from '../../../pathDatabase/databaseUtils/IndexedDB';
 import { numNearestNodes } from '../../../../config/constants';
 
 function CurrentOSRMNodes() {

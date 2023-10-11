@@ -1,6 +1,6 @@
 import { Polyline } from "@react-google-maps/api";
 import { useEffect, useState } from "react";
-import { getAllRawPaths } from "../../../databasePage/databaseUtils/IndexedDB";
+import { getAllRawPaths } from "../../../pathDatabase/databaseUtils/IndexedDB";
 import { useSelector } from "react-redux";
 
 function PreviousRawPaths() {

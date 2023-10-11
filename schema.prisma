@@ -8,7 +8,24 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
  
+model Country {
+  id Int @id @default(autoincrement())
+  country_name String
+}
+
 model City {
-  id        Int      @id @default(autoincrement())
-  name      String
+    id Int @id @default(autoincrement())
+    city_name String
+}
+
+model Street {
+    id Int @id @default(autoincrement())
+    street_name String
+    highway String
+}
+
+model Node {
+    id Int @id
+    lat Float
+    lng Float
 }

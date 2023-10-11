@@ -1,4 +1,4 @@
-import { nodeDistanceThreshold } from "../../../../../config/constants";
+import { nodeDistanceThreshold } from "../../../../config/constants";
 
 export async function getNearestRoadNodes(lat, lng, numNodes) {
     const response = await fetch(`${process.env.REACT_APP_OSRM_SERVER_URL}/nearest/v1/foot/${lng},${lat}.json?number=${numNodes}`);

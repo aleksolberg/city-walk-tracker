@@ -60,12 +60,12 @@ export async function saveOsrmNodes(sessionId, osrmNodes) {
     return db.put('osrmNodes', nodeData);
 }
 
-export async function getAllOsrmNodes() {
+export async function getAllOsrmSessions() {
     const db = await getDatabase();
     return db.getAll('osrmNodes');
 }
 
-export async function clearOsrmNodes() {
+export async function clearOsrmSessions() {
     const db = await getDatabase();
     return db.clear('osrmNodes')
 }

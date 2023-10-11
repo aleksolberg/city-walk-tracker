@@ -1,8 +1,8 @@
-import { getAllOsrmNodes } from "../databaseUtils/IndexedDB";
+import { getAllOsrmSessions } from "../databaseUtils/IndexedDB";
 
 export function DownloadOsrmNodes() {
     const handleDownload = async () => {
-        const data = await getAllOsrmNodes();
+        const data = await getAllOsrmSessions();
         const jsonString = JSON.stringify(data);
         const blob = new Blob([jsonString], { type: 'application/json' });
         const link = document.createElement('a');

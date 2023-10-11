@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { getAllOsrmNodes } from "../../../databasePage/databaseUtils/IndexedDB";
+import { getAllOsrmSessions } from "../../../pathDatabase/databaseUtils/IndexedDB";
 import { Circle } from "@react-google-maps/api";
 
 function PreviousOSRMNodes() {
@@ -12,7 +12,7 @@ function PreviousOSRMNodes() {
         if (!isTracking) {
             async function fetchData() {
                 try {
-                    const sessionsFromDB = await getAllOsrmNodes();
+                    const sessionsFromDB = await getAllOsrmSessions();
                     for (let session of sessionsFromDB) {
                         setPreviousNodes(prevNodes => [...prevNodes, ...session.nodes]);
                     }

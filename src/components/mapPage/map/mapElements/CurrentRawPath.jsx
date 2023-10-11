@@ -1,7 +1,7 @@
 import { Polyline } from '@react-google-maps/api';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { saveRawPath } from '../../../databasePage/databaseUtils/IndexedDB';
+import { saveRawPath } from '../../../pathDatabase/databaseUtils/IndexedDB';
 
 
 function CurrentRawPath() {

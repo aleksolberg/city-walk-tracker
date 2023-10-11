@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
-import { computeDistance } from './mapElements/mapUtils/MapUtils'
-import { geolocationThreshold } from '../../../config/constants';
+import { computeDistance } from './map/mapUtils/MapUtils'
+import { geolocationThreshold } from '../../config/constants';
 import { useDispatch, useSelector } from 'react-redux';
-import { setIsTrackingTrue, setIsTrackingFalse } from '../../../redux/isTrackingSlice';
-import { setLastLoggedPosition } from '../../../redux/lastLoggedPositionSlice';
-import { setSessionId } from '../../../redux/sessionSlice';
-import { getAllSessionIds } from '../../databasePage/databaseUtils/IndexedDB';
+import { setIsTrackingTrue, setIsTrackingFalse } from '../../redux/isTrackingSlice';
+import { setLastLoggedPosition } from '../../redux/lastLoggedPositionSlice';
+import { setSessionId } from '../../redux/sessionSlice';
+import { getAllSessionIds } from '../pathDatabase/databaseUtils/IndexedDB';
 
 function TrackingControl(props) {
   const dispatch = useDispatch();
@@ -43,7 +43,7 @@ function TrackingControl(props) {
 
 
   return (
-    <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 1 }}>
+    <div className='tracking-control'>
       {!isTracking ? (
         <button onClick={startTracking}>Start Tracking</button>
       ) : (
